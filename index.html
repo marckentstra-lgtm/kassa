@@ -149,7 +149,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  if(a==='tab')tab=d.id;
  else if(a==='add')cart[d.id]=(cart[d.id]||0)+1;
  else if(a==='dec'){cart[d.id]=(cart[d.id]||0)-1;if(cart[d.id]<1)delete cart[d.id]}
- else if(a==='clear')cart={};
+ else if(a==='clear'){if(!confirm('Bestelling wissen?'))return;cart={}}
  else if(a==='pay')return pay();
  else if(a==='nav')view=d.v;
  else if(a==='close')return $('#modal').classList.remove('on');
