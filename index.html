@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kassa">
+<meta name="theme-color" content="#16231f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Kassa</title>
+<style>
+:root{--bg:#16231f;--pan:#1f322c;--ink:#f3efe4;--mute:#9fb0a8;--line:#2f453d;--acc:#f2c14e;--bad:#e2725b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.3 ui-rounded,system-ui,-apple-system,sans-serif;overflow:hidden;touch-action:manipulation;-webkit-user-select:none;user-select:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+button{font:inherit;color:inherit;cursor:pointer}
+#app{height:100%;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line)}
+header h1{font-size:20px;margin:0 auto 0 0}
+.nb{background:none;border:0;padding:10px 14px;border-radius:10px;font-weight:600;color:var(--mute)}
+.nb.on{background:var(--pan);color:var(--ink)}
+#main{flex:1;min-height:0}
+#main.kassa{display:grid;grid-template-columns:1fr 360px}
+.pick{display:flex;flex-direction:column;min-height:0}
+.tabs{display:flex;gap:8px;padding:12px 16px 8px;overflow-x:auto}
+.tab{flex:none;padding:12px 18px;border-radius:12px;border:2px solid var(--c);background:none;font-weight:700;font-size:17px}
+.tab.on{background:var(--c);color:#16231f}
+.grid{flex:1;overflow:auto;padding:8px 16px 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));grid-auto-rows:104px;gap:12px;align-content:start}
+.prod{position:relative;display:flex;flex-direction:column;justify-content:space-between;text-align:left;padding:12px 14px;background:var(--pan);border:0;border-left:10px solid var(--c);border-radius:14px}
+.prod:active{transform:scale(.97);background:#28403a}
+.prod b{font-size:19px;line-height:1.15}
+.prod span{font-size:20px;color:var(--c);font-weight:700}
+.prod i{position:absolute;top:8px;right:8px;min-width:28px;padding:2px 8px;border-radius:99px;background:var(--c);color:#16231f;font:700 15px system-ui;text-align:center}
+.cart{display:flex;flex-direction:column;min-height:0;background:var(--pan);border-left:1px solid var(--line)}
+.lines{flex:1;overflow:auto;padding:8px 14px}
+.row{display:grid;grid-template-columns:1fr auto 64px;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+.row small{display:block;color:var(--mute)}
+.qty{display:flex;align-items:center;gap:4px}
+.qty button{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-size:22px}
+.qty span{min-width:24px;text-align:center;font-weight:700}
+.rt{text-align:right;font-weight:700}
+.empty{color:var(--mute);padding:16px}
+.foot{padding:14px;border-top:1px solid var(--line)}
+.sum{display:flex;justify-content:space-between;font-size:26px;font-weight:800;margin-bottom:12px}
+.btns{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.btn{padding:16px;border-radius:12px;border:2px solid var(--line);background:none;font-weight:700;font-size:18px}
+.btn.p{background:var(--acc);border-color:var(--acc);color:#16231f}
+.btn:disabled{opacity:.35}
+.btn.d{border-color:var(--bad);color:var(--bad)}
+.page{height:100%;overflow:auto;padding:16px;-webkit-user-select:text;user-select:text}
+.wrap{max-width:980px;margin:auto;display:grid;gap:16px}
+.card{background:var(--pan);border-radius:14px;padding:16px}
+.card h2{margin:0 0 10px;font-size:18px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+table{width:100%;border-collapse:collapse}
+td,th{padding:8px 4px;border-bottom:1px solid var(--line);text-align:right}
+td:first-child,th:first-child{text-align:left}
+.inp{background:#0f1a17;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:10px;font:inherit;min-width:0;-webkit-user-select:text;user-select:text}
+.ir{display:grid;grid-template-columns:1fr 90px 130px 44px;gap:8px;margin-bottom:8px}
+.ir.h{grid-template-columns:1fr 100px 160px 44px}
+.lab{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.bon{display:flex;justify-content:space-between;width:100%;padding:12px;margin-bottom:6px;border:1px solid var(--line);border-radius:10px;background:none}
+#modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:9}
+#modal.on{display:flex}
+.sheet{background:#ddd;color:#000;border-radius:14px;padding:16px;max-height:94%;overflow:auto;-webkit-user-select:text;user-select:text}
+#receipt{width:76mm;min-width:300px;background:#fff;padding:14px;font:14px/1.35 ui-monospace,Menlo,monospace}
+#receipt h2{text-align:center;margin:0 0 6px;font-size:20px}
+#receipt .c{text-align:center;margin:6px 0}
+#receipt hr{border:0;border-top:1px dashed #000;margin:8px 0}
+.rl{display:flex;justify-content:space-between;gap:8px}
+.rs{font-size:12px;color:#444;padding-left:8px}
+.tot{font-weight:800;font-size:17px}
+.acts{display:flex;gap:10px;margin-top:12px}
+.acts .btn{flex:1;color:#000;border-color:#000;padding:12px}
+@media(max-width:760px){#main.kassa{grid-template-columns:1fr;grid-template-rows:1fr 42%}.two{grid-template-columns:1fr}}
+@media print{@page{size:80mm auto;margin:3mm}body{overflow:visible;padding:0;background:#fff}#app{display:none}#modal{position:static;display:block!important;background:none}.sheet{background:none;padding:0;max-height:none;overflow:visible}#receipt{width:100%;min-width:0;padding:0;font-size:12px}.acts{display:none}}
+</style>
+</head>
+<body>
+<div id="app"><header><h1 id="bar"></h1><nav id="nav" style="display:flex;gap:4px"></nav></header><main id="main"></main></div>
+<div id="modal"><div class="sheet"><div id="rc"></div><div class="acts"><button class="btn" data-act="print">Print bon</button><button class="btn" data-act="close">Sluiten</button></div></div></div>
+<script>
+const $=s=>document.querySelector(s),uid=()=>Math.random().toString(36).slice(2,9);
+const fmt=c=>(c/100).toLocaleString('nl-NL',{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const COL=['#e0a63a','#58a67d','#5aa7c9','#c4607a','#d97d4e','#9b8bd0','#c9c25a','#6fb7b0'],col=i=>COL[i%COL.length];
+const dk=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const num=v=>Math.round(parseFloat(String(v).replace(',','.'))*100)||0;
+function DEF(){const C=(id,name,r,items)=>({id,name,r,items:items.map(([n,p,x])=>({id:uid(),name:n,price:p,r:x||r}))});
+return{bar:'Mijn Bar',btw:{hoog:21,laag:9},nr:0,cats:[
+C('tap','Tapbier','hoog',[['Heineken Pils',300],['IJwit (Brouwerij \'t IJ)',450],['Wisseltap',450],['Skuumkoppe (Texels)',450],['Gaia Oedipus',450],['Heineken 0.0 tap',300,'laag']]),
+C('fles','Flesbier','hoog',[['Zatte Tripel (Brouwerij \'t IJ)',400],['Lellebel',400],['Desperados',400],['Amstel Rosé',350],['Stelz',350],['Apple Bandit',350]]),
+C('nul','0.0','laag',[['Heineken 0.0 fles',250],['Radler 0.0',300],['IPA 0.0 (Brand)',300],['Weizen 0.0 (Brand)',300]]),
+C('wijn','Wijn & Borrel','hoog',[['Wijn',300],['Absolut Vodka',350]]),
+C('fris','Frisdrank','laag',[['Fris',250],['Fristi',250],['Chocomel',250],['Spa',175],['Flügel',195]]),
+C('snack','Snacks','laag',[['Bakje nootjes',300],['Bakje chips',150]])]}}
+const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
+let cfg=load('kassa.cfg',DEF()),orders=load('kassa.orders',[]),cart={},tab=cfg.cats[0]?.id,view='kassa',day=dk(Date.now());
+const save=()=>{try{localStorage.setItem('kassa.cfg',JSON.stringify(cfg));localStorage.setItem('kassa.orders',JSON.stringify(orders))}catch(e){}};
+const items=()=>cfg.cats.flatMap(c=>c.items);
+const lines=()=>Object.entries(cart).map(([id,q])=>({it:items().find(i=>i.id===id),q})).filter(l=>l.it&&l.q>0);
+const total=()=>lines().reduce((s,l)=>s+l.it.price*l.q,0);
+const pct=p=>String(p).replace('.',',');
+
+function render(){
+ $('#bar').textContent=cfg.bar;
+ $('#nav').innerHTML=[['kassa','Kassa'],['dag','Dagoverzicht'],['set','Instellingen']].map(([v,t])=>`<button class="nb ${view===v?'on':''}" data-act="nav" data-v="${v}">${t}</button>`).join('');
+ const m=$('#main');m.className=view==='kassa'?'kassa':'';
+ m.innerHTML=view==='kassa'?vKassa():view==='dag'?vDag():vSet();
+}
+function vKassa(){
+ if(!cfg.cats.length)return'<p class="empty">Geen categorieën. Voeg ze toe bij Instellingen.</p>';
+ const c=cfg.cats.find(x=>x.id===tab)||cfg.cats[0];tab=c.id;const ci=cfg.cats.indexOf(c);
+ const tabs=cfg.cats.map((k,i)=>`<button class="tab ${k.id===tab?'on':''}" style="--c:${col(i)}" data-act="tab" data-id="${k.id}">${esc(k.name)}</button>`).join('');
+ const grid=c.items.map(it=>`<button class="prod" style="--c:${col(ci)}" data-act="add" data-id="${it.id}">${cart[it.id]?`<i>${cart[it.id]}</i>`:''}<b>${esc(it.name)}</b><span>${fmt(it.price)}</span></button>`).join('')||'<p class="empty">Nog geen producten in deze categorie.</p>';
+ const L=lines(),t=total();
+ const rows=L.map(({it,q})=>`<div class="row"><div><b>${esc(it.name)}</b><small>${fmt(it.price)}</small></div><div class="qty"><button data-act="dec" data-id="${it.id}">−</button><span>${q}</span><button data-act="add" data-id="${it.id}">+</button></div><div class="rt">${fmt(it.price*q)}</div></div>`).join('')||'<p class="empty">Tik op een product om te beginnen.</p>';
+ return`<section class="pick"><nav class="tabs">${tabs}</nav><div class="grid">${grid}</div></section><aside class="cart"><div class="lines">${rows}</div><div class="foot"><div class="sum"><span>Totaal</span><span>€ ${fmt(t)}</span></div><div class="btns"><button class="btn d" data-act="clear" ${L.length?'':'disabled'}>Wissen</button><button class="btn p" data-act="pay" ${L.length?'':'disabled'}>Afrekenen</button></div></div></aside>`;
+}
+function vDag(){
+ const os=orders.filter(o=>dk(o.ts)===day),tot=os.reduce((s,o)=>s+o.total,0),P={},V={};
+ os.forEach(o=>{o.lines.forEach(l=>{const p=P[l.name]||(P[l.name]={q:0,s:0});p.q+=l.qty;p.s+=l.price*l.qty});o.vat.forEach(v=>{const x=V[v.pct]||(V[v.pct]={g:0,v:0});x.g+=v.gross;x.v+=v.vat})});
+ const prod=Object.entries(P).sort((a,b)=>b[1].q-a[1].q).map(([n,p])=>`<tr><td>${esc(n)}</td><td>${p.q}</td><td>${fmt(p.s)}</td></tr>`).join('');
+ const vat=Object.entries(V).map(([p,x])=>`<tr><td>${pct(p)}%</td><td>${fmt(x.g)}</td><td>${fmt(x.v)}</td></tr>`).join('');
+ const bons=os.slice().reverse().map(o=>`<button class="bon" data-act="open" data-no="${o.no}"><span>Bon ${String(o.no).padStart(4,'0')} &nbsp; ${new Date(o.ts).toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'})}</span><b>€ ${fmt(o.total)}</b></button>`).join('');
+ return`<div class="page"><div class="wrap"><div class="card lab"><h2 style="margin:0">Dagoverzicht</h2><input class="inp" type="date" value="${day}" data-f="day"><button class="btn" data-act="today" style="padding:10px 14px">Vandaag</button><span style="margin-left:auto;font-size:22px;font-weight:800">€ ${fmt(tot)} <small style="color:var(--mute);font-weight:400">${os.length} bonnen</small></span></div>
+ <div class="two"><div class="card"><h2>Omzet per product</h2>${prod?`<table><tr><th>Product</th><th>Aantal</th><th>Omzet</th></tr>${prod}</table>`:'<p class="empty">Geen bestellingen op deze dag.</p>'}</div>
+ <div><div class="card" style="margin-bottom:16px"><h2>Btw</h2>${vat?`<table><tr><th>Tarief</th><th>Incl. btw</th><th>Btw</th></tr>${vat}</table>`:'<p class="empty">Geen btw.</p>'}</div><div class="card"><h2>Bonnen</h2>${bons||'<p class="empty">Geen bonnen.</p>'}</div></div></div></div></div>`;
+}
+function vSet(){
+ const sel=(v,f,a)=>`<select class="inp" data-f="${f}" ${a}><option value="hoog" ${v==='hoog'?'selected':''}>Alcohol ${pct(cfg.btw.hoog)}%</option><option value="laag" ${v==='laag'?'selected':''}>Laag ${pct(cfg.btw.laag)}%</option></select>`;
+ const cats=cfg.cats.map((c,ci)=>`<div class="card" style="border-left:8px solid ${col(ci)}"><div class="ir h"><input class="inp" value="${esc(c.name)}" data-f="cname" data-c="${c.id}"><span></span>${sel(c.r,'crate',`data-c="${c.id}"`)}<button class="btn d" style="padding:0" data-act="delCat" data-c="${c.id}">✕</button></div>
+ <small style="color:var(--mute)">Btw-tarief hierachter geldt voor nieuwe producten; per product aanpasbaar.</small><div style="margin-top:10px">${c.items.map(i=>`<div class="ir"><input class="inp" value="${esc(i.name)}" data-f="iname" data-c="${c.id}" data-i="${i.id}"><input class="inp" inputmode="decimal" value="${fmt(i.price)}" data-f="iprice" data-c="${c.id}" data-i="${i.id}">${sel(i.r,'irate',`data-c="${c.id}" data-i="${i.id}"`)}<button class="btn d" style="padding:0" data-act="delItem" data-c="${c.id}" data-i="${i.id}">✕</button></div>`).join('')}</div><button class="btn" data-act="addItem" data-c="${c.id}">+ Product</button></div>`).join('');
+ return`<div class="page"><div class="wrap"><div class="card"><h2>Algemeen</h2><div class="lab"><label>Naam op bon <input class="inp" value="${esc(cfg.bar)}" data-f="bar"></label><label>Btw alcohol % <input class="inp" size="4" inputmode="decimal" value="${pct(cfg.btw.hoog)}" data-f="hoog"></label><label>Btw laag % <input class="inp" size="4" inputmode="decimal" value="${pct(cfg.btw.laag)}" data-f="laag"></label></div></div>${cats}<div class="lab"><button class="btn p" data-act="addCat">+ Categorie</button><button class="btn" data-act="reset">Standaardproducten herstellen</button><button class="btn d" data-act="wipe">Alle bonnen wissen</button></div></div></div>`;
+}
+function receipt(o){const d=new Date(o.ts);
+ return`<div id="receipt"><h2>${esc(o.bar)}</h2><p class="c">${d.toLocaleDateString('nl-NL')} ${d.toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'})}<br>Bon ${String(o.no).padStart(4,'0')}</p><hr>${o.lines.map(l=>`<div class="rl"><span>${l.qty} x ${esc(l.name)}</span><span>${fmt(l.price*l.qty)}</span></div>${l.qty>1?`<div class="rs">à ${fmt(l.price)}</div>`:''}`).join('')}<hr><div class="rl tot"><span>TOTAAL</span><span>€ ${fmt(o.total)}</span></div><hr><div class="rs">Btw-uitsplitsing</div>${o.vat.map(v=>`<div class="rl rs"><span>${pct(v.pct)}% over ${fmt(v.net)}</span><span>btw ${fmt(v.vat)}</span></div>`).join('')}<p class="c">Bedankt en tot ziens!</p></div>`}
+const show=o=>{$('#rc').innerHTML=receipt(o);$('#modal').classList.add('on')};
+function pay(){const L=lines();if(!L.length)return;cfg.nr=(cfg.nr||0)+1;const g={};
+ L.forEach(({it,q})=>g[it.r]=(g[it.r]||0)+it.price*q);
+ const o={no:cfg.nr,ts:Date.now(),bar:cfg.bar,total:total(),lines:L.map(({it,q})=>({name:it.name,price:it.price,qty:q,r:it.r})),
+  vat:Object.keys(g).map(r=>{const p=cfg.btw[r],v=Math.round(g[r]*p/(100+p));return{pct:p,gross:g[r],vat:v,net:g[r]-v}})};
+ orders.push(o);cart={};save();show(o);render()}
+const cat=id=>cfg.cats.find(c=>c.id===id);
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const d=b.dataset,a=d.act;
+ if(a==='tab')tab=d.id;
+ else if(a==='add')cart[d.id]=(cart[d.id]||0)+1;
+ else if(a==='dec'){cart[d.id]=(cart[d.id]||0)-1;if(cart[d.id]<1)delete cart[d.id]}
+ else if(a==='clear')cart={};
+ else if(a==='pay')return pay();
+ else if(a==='nav')view=d.v;
+ else if(a==='close')return $('#modal').classList.remove('on');
+ else if(a==='print')return window.print();
+ else if(a==='open')return show(orders.find(o=>o.no==d.no));
+ else if(a==='today')day=dk(Date.now());
+ else if(a==='addItem'){const c=cat(d.c);c.items.push({id:uid(),name:'Nieuw product',price:0,r:c.r})}
+ else if(a==='delItem'){const c=cat(d.c);c.items=c.items.filter(i=>i.id!==d.i);delete cart[d.i]}
+ else if(a==='addCat'){const id=uid();cfg.cats.push({id,name:'Nieuwe categorie',r:'laag',items:[]});tab=tab||id}
+ else if(a==='delCat'){if(!confirm('Categorie en alle producten daarin verwijderen?'))return;cfg.cats=cfg.cats.filter(c=>c.id!==d.c);tab=cfg.cats[0]?.id}
+ else if(a==='reset'){if(!confirm('Alle producten en prijzen terugzetten naar de standaardlijst?'))return;const n=cfg.nr;cfg=DEF();cfg.nr=n;cart={};tab=cfg.cats[0].id}
+ else if(a==='wipe'){if(!confirm('Alle opgeslagen bonnen definitief wissen?'))return;orders=[]}
+ save();render()});
+document.addEventListener('change',e=>{const t=e.target,d=t.dataset,f=d.f;if(!f)return;const c=cat(d.c),i=c&&c.items.find(x=>x.id===d.i);
+ if(f==='day'){day=t.value||day;return render()}
+ if(f==='bar')cfg.bar=t.value.trim()||'Mijn Bar';
+ else if(f==='hoog'||f==='laag'){cfg.btw[f]=parseFloat(t.value.replace(',','.'))||0;save();return render()}
+ else if(f==='cname')c.name=t.value;
+ else if(f==='crate')c.r=t.value;
+ else if(f==='iname')i.name=t.value;
+ else if(f==='iprice'){i.price=num(t.value);t.value=fmt(i.price)}
+ else if(f==='irate')i.r=t.value;
+ save();if(f==='bar')$('#bar').textContent=cfg.bar});
+render();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
