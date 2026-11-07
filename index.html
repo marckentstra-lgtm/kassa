@@ -90,7 +90,7 @@ const COL=['#e0a63a','#58a67d','#5aa7c9','#c4607a','#d97d4e','#9b8bd0','#c9c25a'
 const dk=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const num=v=>Math.round(parseFloat(String(v).replace(',','.'))*100)||0;
 function DEF(){const C=(id,name,r,items)=>({id,name,r,items:items.map(([n,p,x])=>({id:uid(),name:n,price:p,r:x||r}))});
-return{bar:'Mijn Bar',btw:{hoog:21,laag:9},nr:0,cats:[
+return{bar:'Ons aller Epsteinbar',btw:{hoog:21,laag:9},nr:0,cats:[
 C('tap','Tapbier','hoog',[['Heineken Pils',300],['IJwit (Brouwerij \'t IJ)',450],['Wisseltap',450],['Skuumkoppe (Texels)',450],['Gaia Oedipus',450],['Heineken 0.0 tap',300,'laag']]),
 C('fles','Flesbier','hoog',[['Zatte Tripel (Brouwerij \'t IJ)',400],['Lellebel',400],['Desperados',400],['Amstel Rosé',350],['Stelz',350],['Apple Bandit',350]]),
 C('nul','0.0','laag',[['Heineken 0.0 fles',250],['Radler 0.0',300],['IPA 0.0 (Brand)',300],['Weizen 0.0 (Brand)',300]]),
@@ -190,7 +190,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  save();render()});
 document.addEventListener('change',e=>{const t=e.target,d=t.dataset,f=d.f;if(!f)return;const c=cat(d.c),i=c&&c.items.find(x=>x.id===d.i);
  if(f==='day'){day=t.value||day;return render()}
- if(f==='bar')cfg.bar=t.value.trim()||'Mijn Bar';
+ if(f==='bar')cfg.bar=t.value.trim()||'Ons aller Epsteinbar';
  else if(f==='hoog'||f==='laag'){cfg.btw[f]=parseFloat(t.value.replace(',','.'))||0;save();return render()}
  else if(f==='cname')c.name=t.value;
  else if(f==='crate')c.r=t.value;
